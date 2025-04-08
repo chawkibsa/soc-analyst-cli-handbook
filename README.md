@@ -52,17 +52,89 @@ Get-Help Get-CimInstance
 Get-Alias gcim
 ```
 
-#### Create ps1 file: 
+#### Create ps1 file
 ```bash
 function Get-AVInfo { gcim -Namespace root/SecurityCenter2 -ClassName AntivirusProduct }
 ```
-#### Run it :
+#### Run it 
 ```bash
 Import-Module C:\tools\windows_endpoint_introduction\get_avinfo.ps1
 ```
 ```bash
 Get-AVInfo
 ```
+#### Event XML view sample
+```bash
+- <Event xmlns="http://schemas.microsoft.com/win/2004/08/events/event">
+ - <System>
+    <Provider Name="Microsoft-Windows-Security-Auditing" Guid="{54849361-4382-4991-a1ba-3e3b0125c30d}" /> 
+    <EventID>4624</EventID> 
+    <Version>3</Version> 
+    <Level>0</Level> 
+    <Task>12544</Task> 
+    <Opcode>0</Opcode> 
+    <Keywords>0x8020000000000000</Keywords> 
+    <TimeCreated SystemTime="2025-04-08T13:10:00.7179797Z" /> 
+    <EventRecordID>24040</EventRecordID> 
+    <Correlation ActivityID="{4e6aad10-a887-0001-03ae-6a4e87a8db01}" /> 
+    <Execution ProcessID="780" ThreadID="840" /> 
+    <Channel>Security</Channel> 
+    <Computer>DESKTOP</Computer> 
+    <Security /> 
+    </System>
+- <EventData>
+    <Data Name="SubjectUserSid">S-1-5-18</Data> 
+    <Data Name="SubjectUserName">DESKTOP$</Data> 
+    <Data Name="SubjectDomainName">WORKGROUP</Data> 
+    <Data Name="SubjectLogonId">0x3e7</Data> 
+    <Data Name="TargetUserSid">S-1-5-18</Data> 
+    <Data Name="TargetUserName">SYSTEM</Data> 
+    <Data Name="TargetDomainName">NT AUTHORITY</Data> 
+    <Data Name="TargetLogonId">0x3e7</Data> 
+    <Data Name="LogonType">5</Data> 
+    <Data Name="LogonProcessName">Advapi</Data> 
+    <Data Name="AuthenticationPackageName">Negotiate</Data> 
+    <Data Name="WorkstationName">-</Data> 
+    <Data Name="LogonGuid">{00000000-0000-0000-0000-000000000000}</Data> 
+    <Data Name="TransmittedServices">-</Data> 
+    <Data Name="LmPackageName">-</Data> 
+    <Data Name="KeyLength">0</Data> 
+    <Data Name="ProcessId">0x2f8</Data> 
+    <Data Name="ProcessName">C:\Windows\System32\services.exe</Data> 
+    <Data Name="IpAddress">-</Data> 
+    <Data Name="IpPort">-</Data> 
+    <Data Name="ImpersonationLevel">%%1833</Data> 
+    <Data Name="RestrictedAdminMode">-</Data> 
+    <Data Name="RemoteCredentialGuard">-</Data> 
+    <Data Name="TargetOutboundUserName">-</Data> 
+    <Data Name="TargetOutboundDomainName">-</Data> 
+    <Data Name="VirtualAccount">%%1843</Data> 
+    <Data Name="TargetLinkedLogonId">0x0</Data> 
+    <Data Name="ElevatedToken">%%1842</Data> 
+ </EventData>
+</Event>
+```
+#### Use Get-WinEventwith the -ListLogargument to get the details about the four Windows logs.
+``` bash
+Get-WinEvent -ListLog Application, Security, Setup, System
+```
+#### Use Get-WinEvent -LogName Security | Select-Object -First 10 in PowerShell to retrieve the latest 10 Security log entries, the Message field may appear truncated in the output.
+``` bash
+Get-WinEvent -LogName Security | Select-Object -first 10
+```
+#### Filter Security log events with ID 4624 using Where-Object, and display only TimeCreated and Message fields using Select-Object for concise output.
+``` bash
+Get-WinEvent -LogName 'Security' | Where-Object { $_.Id -eq "4624" } | Select-Object -Property TimeCreated,Message -first 10
+```
+#### Use Get-WinEvent -FilterHashtable @{LogName='Security'; Id=4624; StartTime='04/23/2021 14:00:00'; EndTime='04/23/2021 14:30:00'} to efficiently retrieve Logon events within a specific time range using multiple filter conditions.
+##### Note: FilterHashtable requires a LogName, ProviderName,  or Path
+``` bash
+Get-WinEvent -FilterHashtable @{LogName='Security'; StartTime="4/23/2021 14:00:00"; EndTime="4/23/2021 14:30:00"; ID=4624} | Select-Object -Property TimeCreated,Message
+```
+
+
+
+
 
 
 
