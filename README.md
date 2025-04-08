@@ -131,8 +131,22 @@ Get-WinEvent -LogName 'Security' | Where-Object { $_.Id -eq "4624" } | Select-Ob
 ``` bash
 Get-WinEvent -FilterHashtable @{LogName='Security'; StartTime="4/23/2021 14:00:00"; EndTime="4/23/2021 14:30:00"; ID=4624} | Select-Object -Property TimeCreated,Message
 ```
-
-
+#### indices - EvendData values map sample
+```bash
+Index 0 is "SubjectUserSid" 
+Index 1 is "SubjectUserName" 
+Index 2 is "SubjectDomainName" 
+Index 3 is "SubjectLogonId" 
+Index 4 is "TargetUserSid" 
+Index 5 is "TargetUserName" 
+Index 6 is "TargetDomainName" 
+Index 7 is "TargetLogonId" 
+Index 8 is "LogonType" ... 
+```
+#### To detect potential unauthorized remote access during off-hours, use Get-WinEvent with -FilterHashtable to retrieve Security logon events (ID 4624) between 04/23/2021 19:00:00 and 04/26/2021 07:00:00. Then, apply Where-Object to filter for LogonType 10 (Remote Desktop logons) by accessing the 8th EventData property. Format the output with Format-List to view full event details including source IP:
+``` bash
+Get-WinEvent -FilterHashTable @{LogName='Security'; StartTime="4/23/2021 00:00:00"; EndTime="4/26/2021 07:00:00"; ID=4624 } | Where-Object { $_.properties[8].value -eq 10 } | Format-List
+```
 
 
 
